@@ -1,0 +1,7 @@
+server:
+  port: 8001
+spring:
+  config:
+    import: configserver:${CONFIG_SERVER_URL:http://localhost:8888}
+  application:
+    name: users-service
