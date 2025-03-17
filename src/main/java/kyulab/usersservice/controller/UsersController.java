@@ -24,6 +24,12 @@ public class UsersController {
 		return ResponseEntity.ok(new BasicResponse<>(usersService.getUser(id)));
 	}
 
+	// todo : 테스트용
+	@PostMapping("/test")
+	public ResponseEntity<BasicResponse<UsersLoginResDTO>> test() {
+		return ResponseEntity.ok(new BasicResponse<>("success"));
+	}
+
 	@PostMapping("/login")
 	public ResponseEntity<BasicResponse<UsersLoginResDTO>> login(@RequestBody UsersLoginReqDTO loginReqDTO) {
 		return ResponseEntity.ok(new BasicResponse<>(usersService.login(loginReqDTO)));
