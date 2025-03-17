@@ -29,14 +29,14 @@ public class UsersController {
 		return ResponseEntity.ok(new BasicResponse<>(usersService.login(loginReqDTO)));
 	}
 
-	@PostMapping("/sign-up")
+	@PostMapping("/signUp")
 	public ResponseEntity<BasicResponse<String>> signUp(@RequestBody UsersSignUpReqDTO signUpReqDTO) {
 		usersService.signUp(signUpReqDTO);
 		return ResponseEntity.status(HttpStatus.CREATED).body(new BasicResponse<>("Sign Up Success"));
 	}
 
 	@PutMapping("/{id}/update")
-	public ResponseEntity<BasicResponse<UsersInfoResDTO>> update(@PathVariable Long id, UsersUpdateReqDTO updateReqDTO) {
+	public ResponseEntity<BasicResponse<UsersInfoResDTO>> update(@PathVariable Long id, @RequestBody UsersUpdateReqDTO updateReqDTO) {
 		return ResponseEntity.ok(new BasicResponse<>(usersService.update(id, updateReqDTO)));
 	}
 

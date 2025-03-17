@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 @Slf4j
 @Service
@@ -65,6 +66,11 @@ public class UsersService {
 					log.info("Fail UserId : {}", id);
 					return new UserNotFoundException("User Not Found");
 				});
+
+		if (!StringUtils.hasText(updateReqDTO.passWord())) {
+			throw new BadRequestException("비밀번호가 누락되었습니다.");
+		}
+
 		users.setPassWord(passwordEncoder.encode(updateReqDTO.passWord()));
 		return UsersInfoResDTO.from(users);
 	}
