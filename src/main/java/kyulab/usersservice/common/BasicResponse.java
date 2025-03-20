@@ -1,8 +1,10 @@
 package kyulab.usersservice.common;
 
 import lombok.Getter;
+import lombok.ToString;
 
 @Getter
+@ToString
 public class BasicResponse<T> {
 
 	private final T data;
