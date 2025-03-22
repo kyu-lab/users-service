@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.crypto.SecretKey;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
@@ -20,14 +21,19 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class TokenService {
 
-	@Value("${jwt.expiredTime}")
+	@Value("${jwt.access-expiredTime:360}")
 	private long accessExpired;
+
+	@Value("${jwt.refresh-expiredTime:36000}")
+	private long refreshExpired;
 
 	private final SecretUtil secretUtil;
 
-	public String createToken(Users users) {
+	public String createToken(Users users, boolean isAccess) {
 		Map<String, Object> jwtInfo = new HashMap<>();
-		jwtInfo.put(JwsHeader.ALGORITHM, SignatureAlgorithm.HS512.getValue());
+
+		String algo = isAccess ? SignatureAlgorithm.HS256.getValue() : SignatureAlgorithm.HS512.getValue();
+		jwtInfo.put(JwsHeader.ALGORITHM, algo);
 		jwtInfo.put(JwsHeader.TYPE, JwsHeader.JWT_TYPE);
 
 		Claims claims = Jwts.claims().setSubject(String.valueOf(users.getId()));
@@ -35,14 +41,17 @@ public class TokenService {
 
 		LocalDateTime localDateTime = LocalDateTime.now();
 		Date issuedAt = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
-		Date expiration = Date.from(localDateTime.plusSeconds(accessExpired).atZone(ZoneId.systemDefault()).toInstant());
 
+		long time = isAccess ? accessExpired : refreshExpired;
+		Date expiration = Date.from(localDateTime.plusSeconds(time).atZone(ZoneId.systemDefault()).toInstant());
+
+		SecretKey sign = isAccess ? secretUtil.getAccessKey() : secretUtil.getRefreshKey();
 		return Jwts.builder()
 				.setHeader(jwtInfo)
 				.setClaims(claims)
 				.setIssuedAt(issuedAt)
 				.setExpiration(expiration)
-				.signWith(secretUtil.getSecretKey())
+				.signWith(sign)
 				.compact();
 	}
 

@@ -21,12 +21,13 @@ public class UsersController {
 
 	@GetMapping("/{id}")
 	public ResponseEntity<BasicResponse<UsersInfoResDTO>> getUser(@PathVariable Long id) {
-		return ResponseEntity.ok(new BasicResponse<>(usersService.getUser(id)));
+		UsersInfoResDTO result = usersService.getUser(id);
+		return ResponseEntity.ok(new BasicResponse<>(result));
 	}
 
 	// todo : 테스트용
 	@PostMapping("/test")
-	public ResponseEntity<BasicResponse<UsersLoginResDTO>> test() {
+	public ResponseEntity<BasicResponse<String>> test() {
 		return ResponseEntity.ok(new BasicResponse<>("success"));
 	}
 
@@ -41,9 +42,21 @@ public class UsersController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(new BasicResponse<>("Sign Up Success"));
 	}
 
+	@PostMapping("/logout")
+	public ResponseEntity<BasicResponse<String>> logout(@RequestBody Long id) {
+		usersService.logout(id);
+		return ResponseEntity.status(HttpStatus.CREATED).body(new BasicResponse<>("Sign Up Success"));
+	}
+
+	@PostMapping("/refresh")
+	public ResponseEntity<BasicResponse<UsersLoginResDTO>> refresh(@RequestParam Long userId) {
+		return ResponseEntity.ok(new BasicResponse<>(usersService.refresh(userId)));
+	}
+
 	@PutMapping("/{id}/update")
 	public ResponseEntity<BasicResponse<UsersInfoResDTO>> update(@PathVariable Long id, @RequestBody UsersUpdateReqDTO updateReqDTO) {
-		return ResponseEntity.ok(new BasicResponse<>(usersService.update(id, updateReqDTO)));
+		UsersInfoResDTO result = usersService.update(id, updateReqDTO);
+		return ResponseEntity.ok(new BasicResponse<>(result));
 	}
 
 }

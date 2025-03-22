@@ -1,26 +1,22 @@
-# 필요에 따라 수정
-server:
-  port: 8001
+# 개발용 설정파일로 필요에 따라 수정
 spring:
   cloud:
     config:
       enabled: false
-  application:
-    name: users-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/users-service
-    driver-class-name: org.postgresql.Driver
     hikari:
       username: postgres
       password: 1234
   jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: update
-    show-sql: true
     properties:
       hibernate:
         format_sql: true
+  data:
+    redis:
+      port: 6379
+      host: localhost
 eureka:
   client:
     enabled: false
@@ -28,5 +24,9 @@ logging:
   level:
     org.springframework.boot.context.config: TRACE
 jwt:
-  secret: SGVsbG9AI2UzV3JvbGQhQCN9RHxkc2prZC0oOTBNeVNlY3JldCEyMyRGREcjMw==
-  expiredTime: 3600
+  refresh-token: ZHNrbGZqYWRrbHNmamxrZHNhZmtqbGFzZGZsaztqemxrY3h2anpjdnBvY2l4emp2ODlwajMyNDk4ZkAkQCFAJGZkZ3N6ZHNhZmFkc2Y=
+  refresh-expiredTime: 7200000
+  access-token: SGVsbG9AI2UzV3JvbGQhQCN9RHxkc2prZC0oOTBNeVNlY3JldCEyMyRGREcjMw==
+  access-expiredTime: 1
+gateway:
+  key: ZGtzb2FmamRhc3BvZmphZHdzZjtsa2prbGohQCNAKClfKmpA

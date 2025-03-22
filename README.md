@@ -4,10 +4,10 @@
 
 # 설정 파일
 ## application-prod
-운영환경에서 사용되는 설정 파일
+설정 서버로 전달받아 사용
 
-## application-local
-로컬환경에서 사용되는 설정 파일로 커밋 금지
+## application-dev
+개발환경에서 사용되는 설정 파일
 
 ## application-test
 빌드전 테스트를 위한 설정 파일
