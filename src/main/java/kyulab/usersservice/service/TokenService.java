@@ -1,12 +1,10 @@
 package kyulab.usersservice.service;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwsHeader;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import kyulab.usersservice.util.SecretUtil;
 import kyulab.usersservice.entity.Users;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +15,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TokenService {
@@ -53,6 +52,25 @@ public class TokenService {
 				.setExpiration(expiration)
 				.signWith(sign)
 				.compact();
+	}
+
+	public String getSubject(String token) {
+		try {
+			return Jwts.parserBuilder()
+					.setSigningKey(secretUtil.getAccessKey())
+					.build()
+					.parseClaimsJws(token)
+					.getBody()
+					.getSubject();
+		} catch (ExpiredJwtException e) {
+			return e.getClaims().getSubject();
+		} catch (JwtException j) {
+			log.error("잘못된 토큰 : {}", j.getMessage());
+			throw new IllegalArgumentException("Ivalid Token!");
+		} catch (Exception e) {
+			log.error("Jwt Error : " + e.getMessage());
+			throw new RuntimeException("Jwt Error!");
+		}
 	}
 
 }

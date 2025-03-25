@@ -20,23 +20,28 @@ public class Users {
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	private Long id;
 
-	@Column(unique = true)
+	@Column(unique = true, length = 100)
+	private String email;
+
+	@Column(unique = true, nullable = false, length = 30)
 	private String name;
 
 	@JsonIgnore
-	private String passWord;
+	@Column(nullable = false, length = 100)
+	private String password;
 
 	@CreatedDate
 	@Column(updatable = false)
 	private LocalDateTime createdAt;
 
-	public Users(String name, String passWord) {
+	public Users(String email, String name, String password) {
+		this.email = email;
 		this.name = name;
-		this.passWord = passWord;
+		this.password = password;
 	}
 
-	public void setPassWord(String passWord) {
-		this.passWord = passWord;
+	public void setPassword(String password) {
+		this.password = password;
 	}
 
 }

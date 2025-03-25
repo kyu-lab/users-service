@@ -1,5 +1,7 @@
 server:
   port: 8001
+  http2:
+    enabled: true
 spring:
   application:
     name: user-service

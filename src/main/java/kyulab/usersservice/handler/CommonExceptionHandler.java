@@ -1,6 +1,5 @@
 package kyulab.usersservice.handler;
 
-import kyulab.usersservice.common.BasicResponse;
 import kyulab.usersservice.handler.exception.BadRequestException;
 import kyulab.usersservice.handler.exception.UserNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -14,13 +13,13 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 public class CommonExceptionHandler {
 
 	@ExceptionHandler(UserNotFoundException.class)
-	public ResponseEntity<BasicResponse<Object>> handleNotFoundException(UserNotFoundException e) {
-		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new BasicResponse<>(e.getMessage()));
+	public ResponseEntity<String> handleNotFoundException(UserNotFoundException e) {
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
 	}
 
 	@ExceptionHandler(BadRequestException.class)
-	public ResponseEntity<BasicResponse<Object>> handleBadRequestException(BadRequestException e) {
-		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new BasicResponse<>(e.getMessage()));
+	public ResponseEntity<String> handleBadRequestException(BadRequestException e) {
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
 	}
 
 }

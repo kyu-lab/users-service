@@ -27,6 +27,8 @@ jwt:
   refresh-token: ZHNrbGZqYWRrbHNmamxrZHNhZmtqbGFzZGZsaztqemxrY3h2anpjdnBvY2l4emp2ODlwajMyNDk4ZkAkQCFAJGZkZ3N6ZHNhZmFkc2Y=
   refresh-expiredTime: 7200000
   access-token: SGVsbG9AI2UzV3JvbGQhQCN9RHxkc2prZC0oOTBNeVNlY3JldCEyMyRGREcjMw==
-  access-expiredTime: 1
+  access-expiredTime: 3600
+  httpOnly: false
+  secure: false
 gateway:
   key: ZGtzb2FmamRhc3BvZmphZHdzZjtsa2prbGohQCNAKClfKmpA
