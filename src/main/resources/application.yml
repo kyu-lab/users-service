@@ -11,3 +11,5 @@ spring:
   jpa:
     show-sql: true
     open-in-view: false
+gateway:
+  group-path: /gateway/group

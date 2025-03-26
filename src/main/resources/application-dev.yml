@@ -31,4 +31,5 @@ jwt:
   httpOnly: false
   secure: false
 gateway:
+  url: http://localhost:8000
   key: ZGtzb2FmamRhc3BvZmphZHdzZjtsa2prbGohQCNAKClfKmpA

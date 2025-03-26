@@ -1,11 +1,13 @@
 package kyulab.usersservice.service;
 
+import kyulab.usersservice.dto.gateway.UsersGroupCreateDto;
 import kyulab.usersservice.dto.res.UsersInfoResDto;
 import kyulab.usersservice.dto.req.UsersLoginReqDto;
 import kyulab.usersservice.dto.req.UsersSignUpReqDto;
 import kyulab.usersservice.dto.req.UsersUpdateReqDto;
 import kyulab.usersservice.entity.Users;
 import kyulab.usersservice.handler.exception.BadRequestException;
+import kyulab.usersservice.handler.exception.ServiceUnabailabeExcpetion;
 import kyulab.usersservice.handler.exception.UserNotFoundException;
 import kyulab.usersservice.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,7 @@ import org.springframework.util.StringUtils;
 @RequiredArgsConstructor
 public class UsersService {
 
+	private final GroupGatewayService groupGatewayService;
 	private final UsersRepository usersRepository;
 	private final PasswordEncoder passwordEncoder;
 
@@ -75,6 +78,15 @@ public class UsersService {
 			passwordEncoder.encode(signUpDTO.password())
 		);
 		usersRepository.save(users);
+
+		// post-service에게 사용자 그룹 생성을 요청한다.
+		UsersGroupCreateDto createDto = new UsersGroupCreateDto(
+				users.getId(), users.getName(), users.getImgUrl()
+		);
+
+		if (!groupGatewayService.reqeusetPostUserGroup(createDto)) {
+			throw new ServiceUnabailabeExcpetion("post-service unabliable");
+		}
 	}
 
 	@Transactional

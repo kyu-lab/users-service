@@ -29,6 +29,9 @@ public class Users {
 	@JsonIgnore
 	@Column(nullable = false, length = 100)
 	private String password;
+	
+	@Column
+	private String imgUrl; // 사용자 사진
 
 	@CreatedDate
 	@Column(updatable = false)

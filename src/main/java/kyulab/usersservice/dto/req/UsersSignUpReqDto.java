@@ -24,6 +24,6 @@ public record UsersSignUpReqDto(
 		max = 100,
 		message = "비밀번호는 8 ~ 100 자 사이여야 합니다."
 	)
-	String password
-) {
+	String password,
+	String imgUrl) {
 }
