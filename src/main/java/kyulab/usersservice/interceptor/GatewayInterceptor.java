@@ -1,4 +1,4 @@
-package kyulab.usersservice.common;
+package kyulab.usersservice.interceptor;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -23,8 +23,7 @@ public class GatewayInterceptor implements HandlerInterceptor {
 		if (!gatewayKey.equals(requestKey)) {
 			response.setStatus(HttpStatus.UNAUTHORIZED.value());
 			response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-			BasicResponse<String> message = new BasicResponse<>("Invalid gateway key");
-			response.getWriter().write(message.toString());
+			response.getWriter().write("Invalid gateway key");
 			return false;
 		}
 

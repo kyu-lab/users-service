@@ -1,11 +1,15 @@
 server:
   port: 8001
+  http2:
+    enabled: true
 spring:
   application:
-    name: user-service
+    name: users-service
   datasource:
     url: jdbc:postgresql://localhost:5432/users-service
     driver-class-name: org.postgresql.Driver
   jpa:
     show-sql: true
     open-in-view: false
+gateway:
+  group-path: /gateway/group

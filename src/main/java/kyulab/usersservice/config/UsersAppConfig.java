@@ -10,16 +10,23 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.Duration;
+import java.util.Collections;
 
 @Configuration
 public class UsersAppConfig {
 
 	@Value("${jwt.refresh-expiredTime:36000}")
 	private long refreshTokenTime;
+
+	@Value("${gateway.key:}")
+	private String gatewayKey;
 
 	@Bean
 	public PasswordEncoder passwordEncoder() {
@@ -43,6 +50,18 @@ public class UsersAppConfig {
 				.cacheDefaults(redisCacheConfiguration)
 				.withCacheConfiguration("refresh", rConfig)
 				.build();
+	}
+
+	@Bean
+	public RestTemplate restTemplate() {
+		RestTemplate restTemplate = new RestTemplate();
+		restTemplate.setInterceptors(Collections.singletonList((request, body, execution) -> {
+			HttpHeaders headers = request.getHeaders();
+			headers.add("X-GATE-WAY-KEY", gatewayKey);
+			headers.setContentType(MediaType.APPLICATION_JSON);
+			return execution.execute(request, body);
+		}));
+		return restTemplate;
 	}
 
 }
