@@ -4,7 +4,7 @@ server:
     enabled: true
 spring:
   application:
-    name: user-service
+    name: users-service
   datasource:
     url: jdbc:postgresql://localhost:5432/users-service
     driver-class-name: org.postgresql.Driver
