@@ -54,7 +54,7 @@ public class TokenService {
 				.compact();
 	}
 
-	public String getSubject(String token) {
+	public String getUserId(String token) {
 		try {
 			return Jwts.parserBuilder()
 					.setSigningKey(secretUtil.getAccessKey())

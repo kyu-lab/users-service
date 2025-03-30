@@ -4,7 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
-import kyulab.usersservice.dto.res.BasicResDto;
+import kyulab.usersservice.dto.req.UsersChangePasswordReqDto;
 import kyulab.usersservice.dto.res.TokenDto;
 import kyulab.usersservice.dto.req.UsersSignUpReqDto;
 import kyulab.usersservice.dto.res.UsersInfoResDto;
@@ -46,7 +46,7 @@ public class UsersController {
 	}
 
 	@GetMapping("/mail/{email}/check")
-	public ResponseEntity<BasicResDto> checkEmail(
+	public ResponseEntity<String> checkEmail(
 			@PathVariable("email")
 			@NotBlank(message = "이메일은 필수입니다.")
 		 	@Email(
@@ -56,13 +56,28 @@ public class UsersController {
 		 	String mail) {
 
 		if (usersService.existsByEmail(mail)) {
-			return ResponseEntity.ok(new BasicResDto(false, "이미 사용중인 이메일입니다."));
+			return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 사용중인 이메일입니다.");
 		}
-		return ResponseEntity.ok(new BasicResDto(true, "ok"));
+		return ResponseEntity.ok().build();
+	}
+
+	@GetMapping("/mail/{email}/exists")
+	public ResponseEntity<String> existsEmail(
+			@PathVariable("email")
+			@NotBlank(message = "이메일은 필수입니다.")
+			@Email(
+					regexp = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*$",
+					message = "유효한 이메일 형식이어야 합니다."
+			)
+			String mail) {
+		if (!usersService.existsByEmail(mail)) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("존재하지 않는 이메일입니다.");
+		}
+		return ResponseEntity.ok().build();
 	}
 
 	@GetMapping("/name/{name}/check")
-	public ResponseEntity<BasicResDto> checkName(
+	public ResponseEntity<String> checkName(
 			@PathVariable("name")
 			@NotBlank(message = "이름은 필수 입력 항목입니다.")
 			@Pattern(
@@ -71,9 +86,9 @@ public class UsersController {
 			)
 			String name) {
 		if (usersService.existsByName(name)) {
-			return ResponseEntity.ok(new BasicResDto(false, "이미 사용중인 이름입니다."));
+			return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 사용중인 이름입니다.");
 		}
-		return ResponseEntity.ok(new BasicResDto(true, "ok"));
+		return ResponseEntity.ok().build();
 	}
 
 	@GetMapping("/refresh")
@@ -82,7 +97,7 @@ public class UsersController {
 		if (Objects.isNull(accessToken) || !accessToken.startsWith("Bearer ")) {
 			return ResponseEntity.badRequest().build();
 		}
-		long userId = Long.parseLong(tokenService.getSubject(accessToken.substring(7)));
+		long userId = Long.parseLong(tokenService.getUserId(accessToken.substring(7)));
 		Users users = usersService.refresh(userId);
 		String newAccessToken = tokenService.createToken(users, true);
 		return ResponseEntity.ok(new TokenDto(newAccessToken));
@@ -110,29 +125,28 @@ public class UsersController {
 	}
 
 	@PostMapping("/signup")
-	public ResponseEntity<BasicResDto> signup(@RequestBody UsersSignUpReqDto signUpReqDTO) {
+	public ResponseEntity<String> signup(@RequestBody UsersSignUpReqDto signUpReqDTO) {
 		try {
 			usersService.signup(signUpReqDTO);
 		} catch (Exception e) {
 			if (e instanceof IllegalArgumentException) {
 				if (e.getMessage().equals("email exists")) {
-					return ResponseEntity.ok(new BasicResDto(false, "이미 사용중인 메일입니다."));
+					return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 사용중인 메일입니다.");
 				} else if (e.getMessage().equals("name exists")) {
-					return ResponseEntity.ok(new BasicResDto(false, "이미 사용중인 이름입니다."));
+					return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 사용중인 이름입니다.");
 				}
 			}
-			return ResponseEntity.internalServerError().body(new BasicResDto(false, "server error"));
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("gateway 통신 에러");
 		}
-		return ResponseEntity.ok(new BasicResDto(true, "회원가입을 축하합니다!"));
+		return ResponseEntity.ok("회원가입을 완료되었습니다.");
 	}
 
 	@PostMapping("/logout")
-	public ResponseEntity<BasicResDto> logout(HttpServletRequest request) {
-		String accessToken = request.getHeader(HttpHeaders.AUTHORIZATION);
+	public ResponseEntity<String> logout(@RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String accessToken) {
 		if (Objects.isNull(accessToken) || !accessToken.startsWith("Bearer ")) {
-			return ResponseEntity.badRequest().body(new BasicResDto(false, "token not includ"));
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("token not includ");
 		}
-		redisTemplate.delete("refresh-" + tokenService.getSubject(accessToken.substring(7)));
+		redisTemplate.delete("refresh-" + tokenService.getUserId(accessToken.substring(7)));
 
 		// 리프레쉬 토큰 제거
 		String cookie = ResponseCookie
@@ -146,12 +160,24 @@ public class UsersController {
 				.toString();
 		return ResponseEntity.ok()
 				.header(HttpHeaders.SET_COOKIE, cookie)
-				.body(new BasicResDto(true, "ok"));
+				.build();
 	}
 
-	@PutMapping("/{id}/update")
-	public ResponseEntity<UsersInfoResDto> update(@PathVariable Long id, @RequestBody UsersUpdateReqDto updateReqDTO) {
-		return ResponseEntity.ok(usersService.update(id, updateReqDTO));
+	@PostMapping("/change/password")
+	public ResponseEntity<String> changePassword(@RequestBody UsersChangePasswordReqDto passwordReqDto) {
+		usersService.changePassword(passwordReqDto);
+		return ResponseEntity.ok("비밀번호가 재설정되었습니다.");
+	}
+
+	// todo : 사용자 설정 창
+	@PostMapping("/settings")
+	public ResponseEntity<String> setting() {
+		return ResponseEntity.ok().build();
+	}
+
+	@PutMapping("/update")
+	public ResponseEntity<UsersInfoResDto> update(@RequestBody UsersUpdateReqDto updateReqDTO) {
+		return ResponseEntity.ok(usersService.update(updateReqDTO));
 	}
 
 }

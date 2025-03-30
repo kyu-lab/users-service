@@ -1,6 +1,7 @@
 package kyulab.usersservice.service;
 
 import kyulab.usersservice.dto.gateway.UsersGroupCreateDto;
+import kyulab.usersservice.dto.req.UsersChangePasswordReqDto;
 import kyulab.usersservice.dto.res.UsersInfoResDto;
 import kyulab.usersservice.dto.req.UsersLoginReqDto;
 import kyulab.usersservice.dto.req.UsersSignUpReqDto;
@@ -10,6 +11,7 @@ import kyulab.usersservice.handler.exception.BadRequestException;
 import kyulab.usersservice.handler.exception.ServiceUnabailabeExcpetion;
 import kyulab.usersservice.handler.exception.UserNotFoundException;
 import kyulab.usersservice.repository.UsersRepository;
+import kyulab.usersservice.util.UserContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -40,13 +42,13 @@ public class UsersService {
 	}
 
 	@Transactional(readOnly = true)
-	public boolean existsByEmail(String mail) {
-		return usersRepository.existsByEmail(mail);
+	public boolean existsByEmail(String email) {
+		return usersRepository.existsByEmail(email);
 	}
 
 	@Transactional(readOnly = true)
-	public boolean existsByName(String mail) {
-		return usersRepository.existsByName(mail);
+	public boolean existsByName(String name) {
+		return usersRepository.existsByName(name);
 	}
 
 	@Transactional(readOnly = true)
@@ -89,7 +91,7 @@ public class UsersService {
 		}
 	}
 
-	@Transactional
+	@Transactional(readOnly = true)
 	public Users refresh(Long id) {
 		return usersRepository.findById(id)
 				.orElseThrow(() -> {
@@ -99,8 +101,19 @@ public class UsersService {
 	}
 
 	@Transactional
-	@CacheEvict(value = "user", key = "#id")
-	public UsersInfoResDto update(Long id, UsersUpdateReqDto updateReqDTO) {
+	public void changePassword(UsersChangePasswordReqDto passwordReqDto) {
+		Users users = usersRepository.findByEmail(passwordReqDto.email())
+				.orElseThrow(() -> {
+					log.info("Cant find email : {}", passwordReqDto.email());
+					return new UserNotFoundException("User Not Found");
+				});
+		users.setPassword(passwordEncoder.encode(passwordReqDto.password()));
+	}
+
+	@Transactional
+	@CacheEvict(value = "user", key = "T(kyulab.usersservice.util.UserContext).getUserId()")
+	public UsersInfoResDto update(UsersUpdateReqDto updateReqDTO) {
+		long id = UserContext.getUserId();
 		Users users = usersRepository.findById(id)
 				.orElseThrow(() -> {
 					log.info("Fail UserId : {}", id);
