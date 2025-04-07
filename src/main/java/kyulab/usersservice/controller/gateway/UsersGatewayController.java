@@ -1,8 +1,8 @@
-package kyulab.usersservice.controller;
+package kyulab.usersservice.controller.gateway;
 
 import kyulab.usersservice.dto.gateway.UsersList;
 import kyulab.usersservice.dto.res.UsersInfoResDto;
-import kyulab.usersservice.service.UsersGatewayService;
+import kyulab.usersservice.service.gateway.UsersGatewayService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

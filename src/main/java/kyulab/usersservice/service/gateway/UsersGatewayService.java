@@ -1,4 +1,4 @@
-package kyulab.usersservice.service;
+package kyulab.usersservice.service.gateway;
 
 import kyulab.usersservice.dto.gateway.UsersList;
 import kyulab.usersservice.dto.res.UsersInfoResDto;

@@ -21,7 +21,7 @@ public class ServiceInterceptor implements HandlerInterceptor {
 		// 토큰이 있을 경우 아이디를 추출한다.
 		String token = request.getHeader(HttpHeaders.AUTHORIZATION);
 		if (StringUtils.hasText(token)) {
-			String userId = tokenService.getUserId(request.getHeader(HttpHeaders.AUTHORIZATION));
+			String userId = tokenService.getUserId(token.substring(7));
 			if (!userId.isEmpty()) {
 				UserContext.setUserId(Long.parseLong(userId));
 			}

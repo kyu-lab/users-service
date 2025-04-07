@@ -1,6 +1,5 @@
 package kyulab.usersservice.controller;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -13,6 +12,7 @@ import kyulab.usersservice.service.TokenService;
 import kyulab.usersservice.service.UsersService;
 import kyulab.usersservice.dto.req.UsersLoginReqDto;
 import kyulab.usersservice.dto.req.UsersUpdateReqDto;
+import kyulab.usersservice.util.UserContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -39,11 +39,6 @@ public class UsersController {
 
 	@Value("${jwt.secure:true}")
 	private boolean tokenSecure;
-
-	@GetMapping("/{id}")
-	public ResponseEntity<UsersInfoResDto> getUser(@PathVariable Long id) {
-		return ResponseEntity.ok(usersService.getUser(id));
-	}
 
 	@GetMapping("/mail/{email}/check")
 	public ResponseEntity<String> checkEmail(
@@ -92,15 +87,21 @@ public class UsersController {
 	}
 
 	@GetMapping("/refresh")
-	public ResponseEntity<TokenDto> refresh(HttpServletRequest request) {
-		String accessToken = request.getHeader(HttpHeaders.AUTHORIZATION);
-		if (Objects.isNull(accessToken) || !accessToken.startsWith("Bearer ")) {
-			return ResponseEntity.badRequest().build();
-		}
-		long userId = Long.parseLong(tokenService.getUserId(accessToken.substring(7)));
-		Users users = usersService.refresh(userId);
-		String newAccessToken = tokenService.createToken(users, true);
+	public ResponseEntity<TokenDto> refresh() {
+		Long userId = UserContext.getUserId();
+		String newAccessToken = tokenService.createToken(usersService.getUser(userId), true);
 		return ResponseEntity.ok(new TokenDto(newAccessToken));
+	}
+
+	@GetMapping("/settings/account")
+	public ResponseEntity<UsersInfoResDto> getUserAccount() {
+		return ResponseEntity.ok(usersService.getUserInfo());
+	}
+
+	// todo : 사용자 옵션들...
+	@GetMapping("/settings/notices")
+	public ResponseEntity<String> getUserNotices() {
+		return ResponseEntity.ok().build();
 	}
 
 	@PostMapping("/login")
@@ -126,18 +127,7 @@ public class UsersController {
 
 	@PostMapping("/signup")
 	public ResponseEntity<String> signup(@RequestBody UsersSignUpReqDto signUpReqDTO) {
-		try {
-			usersService.signup(signUpReqDTO);
-		} catch (Exception e) {
-			if (e instanceof IllegalArgumentException) {
-				if (e.getMessage().equals("email exists")) {
-					return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 사용중인 메일입니다.");
-				} else if (e.getMessage().equals("name exists")) {
-					return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 사용중인 이름입니다.");
-				}
-			}
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("gateway 통신 에러");
-		}
+		usersService.signup(signUpReqDTO);
 		return ResponseEntity.ok("회원가입을 완료되었습니다.");
 	}
 
@@ -146,7 +136,7 @@ public class UsersController {
 		if (Objects.isNull(accessToken) || !accessToken.startsWith("Bearer ")) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("token not includ");
 		}
-		redisTemplate.delete("refresh-" + tokenService.getUserId(accessToken.substring(7)));
+		redisTemplate.delete("refresh-" + UserContext.getUserId());
 
 		// 리프레쉬 토큰 제거
 		String cookie = ResponseCookie
@@ -169,15 +159,15 @@ public class UsersController {
 		return ResponseEntity.ok("비밀번호가 재설정되었습니다.");
 	}
 
-	// todo : 사용자 설정 창
-	@PostMapping("/settings")
-	public ResponseEntity<String> setting() {
-		return ResponseEntity.ok().build();
-	}
-
 	@PutMapping("/update")
 	public ResponseEntity<UsersInfoResDto> update(@RequestBody UsersUpdateReqDto updateReqDTO) {
 		return ResponseEntity.ok(usersService.update(updateReqDTO));
+	}
+
+	@DeleteMapping
+	public ResponseEntity<String> deleteUser() {
+		usersService.delete();
+		return ResponseEntity.ok().build();
 	}
 
 }
