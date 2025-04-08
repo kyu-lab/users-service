@@ -33,6 +33,9 @@ public class Users {
 	@Column
 	private String imgUrl; // 사용자 사진
 
+	@Column
+	private Boolean isDelete;
+
 	@CreatedDate
 	@Column(updatable = false)
 	private LocalDateTime createdAt;
@@ -41,10 +44,18 @@ public class Users {
 		this.email = email;
 		this.name = name;
 		this.password = password;
+		this.isDelete = false;
 	}
 
-	public void setPassword(String password) {
+	public void updatePassword(String password) {
 		this.password = password;
+	}
+
+	/**
+	 * 사용자를 삭제 상태로 변경한다.
+	 */
+	public void deleteUsers() {
+		this.isDelete = true;
 	}
 
 }
