@@ -93,15 +93,9 @@ public class UsersController {
 		return ResponseEntity.ok(new TokenDto(newAccessToken));
 	}
 
-	@GetMapping("/settings/account")
-	public ResponseEntity<UsersInfoResDto> getUserAccount() {
-		return ResponseEntity.ok(usersService.getUserInfo());
-	}
-
-	// todo : 사용자 옵션들...
-	@GetMapping("/settings/notices")
-	public ResponseEntity<String> getUserNotices() {
-		return ResponseEntity.ok().build();
+	@GetMapping("/{userId}/info")
+	public ResponseEntity<UsersInfoResDto> getUserInfo(@PathVariable long userId) {
+		return ResponseEntity.ok(usersService.getUserInfo(userId));
 	}
 
 	@PostMapping("/login")

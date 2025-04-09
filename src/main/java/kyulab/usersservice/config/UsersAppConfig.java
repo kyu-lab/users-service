@@ -1,5 +1,6 @@
 package kyulab.usersservice.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
@@ -62,6 +63,11 @@ public class UsersAppConfig {
 			return execution.execute(request, body);
 		}));
 		return restTemplate;
+	}
+
+	@Bean
+	public ObjectMapper objectMapper() {
+		return new ObjectMapper();
 	}
 
 }

@@ -14,6 +14,7 @@ import kyulab.usersservice.handler.exception.ServiceUnavailabeExcpetion;
 import kyulab.usersservice.handler.exception.UserNotFoundException;
 import kyulab.usersservice.repository.UsersRepository;
 import kyulab.usersservice.service.gateway.GroupGatewayService;
+import kyulab.usersservice.service.kafka.KafkaService;
 import kyulab.usersservice.util.UserContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,9 +46,8 @@ public class UsersService {
 	}
 
 	@Transactional(readOnly = true)
-	@Cacheable("userInfo")
-	public UsersInfoResDto getUserInfo() {
-		long userId = UserContext.getUserId();
+//	@Cacheable("userInfo")
+	public UsersInfoResDto getUserInfo(long userId) {
 		return UsersInfoResDto.from(getUser(userId));
 	}
 
@@ -123,7 +123,7 @@ public class UsersService {
 	}
 
 	@Transactional
-	@CacheEvict(value = "userInfo", key = "T(kyulab.usersservice.util.UserContext).getUserId()")
+//	@CacheEvict(value = "userInfo", key = "T(kyulab.usersservice.util.UserContext).getUserId()")
 	public UsersInfoResDto update(UsersUpdateReqDto updateReqDTO) {
 		long id = UserContext.getUserId();
 		Users users = usersRepository.findById(id)
