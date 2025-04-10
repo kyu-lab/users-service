@@ -51,6 +51,10 @@ public class Users {
 		this.password = password;
 	}
 
+	public void updateUserImg(String imgUrl) {
+		this.imgUrl = imgUrl;
+	}
+
 	/**
 	 * 사용자를 삭제 상태로 변경한다.
 	 */
