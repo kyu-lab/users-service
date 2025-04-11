@@ -28,9 +28,8 @@ services:
       - pgdata:/var/lib/postgresql/data  # 데이터 영속성 (옵션)
     networks:
       - my-network
-
 networks:
   my-network:
-    driver: bridge
+    external: true
 volumes:
   pgdata:
