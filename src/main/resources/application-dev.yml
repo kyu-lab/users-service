@@ -29,10 +29,34 @@ spring:
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 eureka:
   client:
-    enabled: false
+    enabled: true
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/discovery/eureka
+  instance:
+    prefer-ip-address: true
+    lease-renewal-interval-in-seconds: 30
+    lease-expiration-duration-in-seconds: 120
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    info:
+      access: read_only
+    health:
+      show-details: always
 logging:
   level:
-    org.springframework.boot.context.config: TRACE
+    root: INFO
+    com.netflix.discovery: INFO
+    org.springframework.kafka: INFO
+    org.springframework.data.jpa: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.hibernate.type.descriptor.sql.BasicExtractor: TRACE
 jwt:
   refresh-token: ZHNrbGZqYWRrbHNmamxrZHNhZmtqbGFzZGZsaztqemxrY3h2anpjdnBvY2l4emp2ODlwajMyNDk4ZkAkQCFAJGZkZ3N6ZHNhZmFkc2Y=
   refresh-expiredTime: 7200000
@@ -41,5 +65,6 @@ jwt:
   httpOnly: false
   secure: false
 gateway:
-  url: http://localhost:8000
-  key: ZGtzb2FmamRhc3BvZmphZHdzZjtsa2prbGohQCNAKClfKmpA
+  base-url: http://localhost:8000/gateway
+  gateway-key: ZGtzb2FmamRhc3BvZmphZHdzZjtsa2prbGohQCNAKClfKmpA
+  group-path: /group

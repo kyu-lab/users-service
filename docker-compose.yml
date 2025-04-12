@@ -1,6 +1,6 @@
-version: '3.8'
 services:
   users-service:
+    container_name: uapp
     image: users-service:latest
     build:
       context: .
@@ -9,12 +9,13 @@ services:
       - "8001:8001"
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/users-service
-      - CONFIG_SERVER_URL=http://172.17.0.1:8888 # 리눅스 도커 호스트 브릿지
+      - CONFIG_SERVER_URL=http://172.17.0.1:8888
     depends_on:
       - postgres
     networks:
       - my-network
   postgres:
+    container_name: upost
     image: postgres:15
     environment:
       - POSTGRES_DB=users-service
@@ -23,12 +24,11 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data  # 데이터 영속성 (옵션)
+      - pgdata:/var/lib/postgresql/data
     networks:
       - my-network
-
 networks:
   my-network:
-    driver: bridge
+    external: true
 volumes:
   pgdata:

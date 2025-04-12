@@ -16,10 +16,10 @@ import org.springframework.web.client.RestTemplate;
 @RequiredArgsConstructor
 public class GroupGatewayService {
 
-	@Value("${gateway.url:}")
+	@Value("${gateway.base-url:}")
 	private String gateway;
 
-	@Value("${gateway.group-path:}")
+	@Value("${gateway.group-path:/group}")
 	private String groupPath;
 
 	private final RestTemplate restTemplate;
