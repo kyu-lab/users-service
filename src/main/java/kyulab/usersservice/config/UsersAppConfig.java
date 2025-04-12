@@ -26,7 +26,7 @@ public class UsersAppConfig {
 	@Value("${jwt.refresh-expiredTime:36000}")
 	private long refreshTokenTime;
 
-	@Value("${gateway.key:}")
+	@Value("${gateway.gateway-key:}")
 	private String gatewayKey;
 
 	@Bean
