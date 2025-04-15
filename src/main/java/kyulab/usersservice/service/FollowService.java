@@ -39,10 +39,10 @@ public class FollowService {
 
 		Users follower = usersService.getUser(followerId);
 		Users following = usersService.getUser(UserContext.getUserId());
-		Follow follow = new Follow(follower, following);
-		if (followRepository.existsFollowAndFollowing(follower, following)) {
+		if (followRepository.existsByFollowerAndFollowing(follower, following)) {
 			throw new BadRequestException("이미 구독하였습니다.");
 		}
+		Follow follow = new Follow(follower, following);
 		followRepository.save(follow);
 	}
 
@@ -50,8 +50,7 @@ public class FollowService {
 	public void unFollow(long followerId) {
 		Users follower = usersService.getUser(followerId);
 		Users following = usersService.getUser(UserContext.getUserId());
-		Follow follow = new Follow(follower, following);
-		followRepository.delete(follow);
+		followRepository.deleteByFollowerAndFollowing(follower, following);
 	}
 
 }

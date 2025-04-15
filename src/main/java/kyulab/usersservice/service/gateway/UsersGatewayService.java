@@ -1,6 +1,8 @@
 package kyulab.usersservice.service.gateway;
 
 import kyulab.usersservice.dto.gateway.UsersList;
+import kyulab.usersservice.dto.gateway.UsersListDto;
+import kyulab.usersservice.dto.gateway.UsersPreviewDto;
 import kyulab.usersservice.dto.res.UsersInfoResDto;
 import kyulab.usersservice.entity.Users;
 import kyulab.usersservice.handler.exception.UserNotFoundException;
@@ -34,21 +36,22 @@ public class UsersGatewayService {
 	}
 
 	@Transactional(readOnly = true)
-	public UsersList getUsers(List<Long> userIds) {
-		List<Users> users = usersRepository.findByIdIn(userIds);
+	public UsersList getUsers(UsersListDto listDto) {
+		List<UsersPreviewDto> userList;
+		if (listDto.requestUserId() == null) {
+			userList = usersRepository.findUserWithFollow(listDto.usersIds());
+		} else {
+			userList = usersRepository.findUserWithFollowForLogin(listDto.requestUserId(), listDto.usersIds());
+		}
 
-		Set<Long> foundUserIds = users.stream()
-				.map(Users::getId)
+		Set<Long> foundUserIds = userList.stream()
+				.map(UsersPreviewDto::id)
 				.collect(Collectors.toSet());
 
 		// 찾지 못한 사용자 ID 목록 생성
-		List<Long> failList = userIds.stream()
+		Set<Long> failList = listDto.usersIds().stream()
 				.filter(id -> !foundUserIds.contains(id))
-				.toList();
-
-		List<UsersInfoResDto> userList = users.stream()
-				.map(UsersInfoResDto::from)
-				.toList();
+				.collect(Collectors.toSet());
 
 		return new UsersList(userList, failList);
 	}

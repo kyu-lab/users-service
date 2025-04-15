@@ -1,6 +1,7 @@
 package kyulab.usersservice.controller.gateway;
 
 import kyulab.usersservice.dto.gateway.UsersList;
+import kyulab.usersservice.dto.gateway.UsersListDto;
 import kyulab.usersservice.dto.res.UsersInfoResDto;
 import kyulab.usersservice.service.gateway.UsersGatewayService;
 import lombok.RequiredArgsConstructor;
@@ -21,8 +22,8 @@ public class UsersGatewayController {
 	}
 
 	@PostMapping
-	public UsersList getUsers(@RequestBody List<Long> userIds) {
-		return usersGatewayService.getUsers(userIds);
+	public UsersList getUsers(@RequestBody UsersListDto listDto) {
+		return usersGatewayService.getUsers(listDto);
 	}
 
 }
