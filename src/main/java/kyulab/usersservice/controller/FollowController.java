@@ -1,6 +1,6 @@
 package kyulab.usersservice.controller;
 
-import kyulab.usersservice.dto.res.FollowDto;
+import kyulab.usersservice.dto.res.FollowInfoDto;
 import kyulab.usersservice.service.FollowService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +17,7 @@ public class FollowController {
 	private final FollowService followService;
 
 	@GetMapping
-	public ResponseEntity<List<FollowDto>> getFollows() {
+	public ResponseEntity<List<FollowInfoDto>> getFollows() {
 		return ResponseEntity.ok(followService.getFollows());
 	}
 

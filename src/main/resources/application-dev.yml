@@ -4,12 +4,13 @@ spring:
     config:
       enabled: false
   datasource:
+    url: jdbc:postgresql://localhost:5432/users-service
     hikari:
       username: postgres
       password: 1234
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     properties:
       hibernate:
         format_sql: true
@@ -64,6 +65,4 @@ jwt:
   httpOnly: false
   secure: false
 gateway:
-  base-url: http://localhost:8000/gateway
   gateway-key: ZGtzb2FmamRhc3BvZmphZHdzZjtsa2prbGohQCNAKClfKmpA
-  group-path: /group

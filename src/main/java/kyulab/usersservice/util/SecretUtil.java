@@ -10,14 +10,17 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Base64;
 
+/**
+ * jwt 토큰값 암호화용 클래스
+ */
 @Component
 public class SecretUtil {
 
-	@Value("${jwt.access-token:}")
+	@Value("${jwt.access-token:access}")
 	private String accessKeyOrigin;
 	private SecretKey accessKey;
 
-	@Value("${jwt.refresh-token:}")
+	@Value("${jwt.refresh-token:refresh}")
 	private String refreshKeyOrigin;
 	private SecretKey refreshKey;
 

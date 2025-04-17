@@ -1,4 +1,4 @@
-package kyulab.usersservice.dto.gateway;
+package kyulab.usersservice.dto.gateway.res;
 
 import java.util.List;
 import java.util.Set;
@@ -8,7 +8,5 @@ import java.util.Set;
  * @param userList 발견한 사용자 데이터들
  * @param failList 찾지 못한 사용자 이이디 목록
  */
-public record UsersList(
-		List<UsersPreviewDto> userList,
-		Set<Long> failList) {
+public record UsersListGatewayDto(List<UsersPreviewGatewayDto> userList, Set<Long> failList) {
 }

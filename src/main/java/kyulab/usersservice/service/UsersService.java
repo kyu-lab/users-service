@@ -1,25 +1,21 @@
 package kyulab.usersservice.service;
 
-import kyulab.usersservice.dto.gateway.UsersGroupCreateDto;
-import kyulab.usersservice.dto.kafka.UsersDto;
-import kyulab.usersservice.dto.req.UsersChangePasswordReqDto;
-import kyulab.usersservice.dto.res.UsersInfoResDto;
-import kyulab.usersservice.dto.req.UsersLoginReqDto;
-import kyulab.usersservice.dto.req.UsersSignUpReqDto;
+import kyulab.usersservice.domain.UserStatus;
+import kyulab.usersservice.dto.kafka.UsersKafkaDto;
+import kyulab.usersservice.dto.req.UsersChangePasswordDto;
+import kyulab.usersservice.dto.req.UsersLoginDto;
+import kyulab.usersservice.dto.res.UsersInfoDto;
+import kyulab.usersservice.dto.req.UsersSignUpDto;
 import kyulab.usersservice.dto.req.UsersUpdateReqDto;
 import kyulab.usersservice.entity.Users;
 import kyulab.usersservice.handler.exception.BadRequestException;
 import kyulab.usersservice.handler.exception.ConflictRequestException;
-import kyulab.usersservice.handler.exception.ServiceUnavailabeExcpetion;
-import kyulab.usersservice.handler.exception.UserNotFoundException;
+import kyulab.usersservice.handler.exception.NotFoundException;
 import kyulab.usersservice.repository.UsersRepository;
-import kyulab.usersservice.service.gateway.GroupGatewayService;
 import kyulab.usersservice.service.kafka.KafkaService;
 import kyulab.usersservice.util.UserContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,7 +26,6 @@ import org.springframework.util.StringUtils;
 @RequiredArgsConstructor
 public class UsersService {
 
-	private final GroupGatewayService groupGatewayService;
 	private final KafkaService kafkaService;
 	private final UsersRepository usersRepository;
 	private final PasswordEncoder passwordEncoder;
@@ -40,15 +35,13 @@ public class UsersService {
 		return usersRepository.findById(id)
 				.orElseThrow(() -> {
 					log.info("Fail UserId : {}", id);
-					return new UserNotFoundException("Inavlid User");
+					return new NotFoundException("Inavlid User");
 				});
-
 	}
 
 	@Transactional(readOnly = true)
-//	@Cacheable("userInfo")
-	public UsersInfoResDto getUserInfo(long userId) {
-		return UsersInfoResDto.from(getUser(userId));
+	public UsersInfoDto getUserInfo(long userId) {
+		return UsersInfoDto.from(getUser(userId));
 	}
 
 	@Transactional(readOnly = true)
@@ -62,26 +55,30 @@ public class UsersService {
 	}
 
 	@Transactional(readOnly = true)
-	public Users login(UsersLoginReqDto loginReqDTO) {
+	public Users login(UsersLoginDto loginReqDTO) {
 		Users users = usersRepository.findByEmail(loginReqDTO.email())
 				.orElseThrow(() -> {
 					log.info("Cant find email : {}", loginReqDTO.email());
-					return new UserNotFoundException("User Not Found");
+					return new NotFoundException("User Not Found");
 				});
 
 		if (!passwordEncoder.matches(loginReqDTO.password(), users.getPassword())) {
-			throw new UserNotFoundException("Wrong Password");
+			throw new NotFoundException("Wrong Password");
 		}
 
-		if (users.getIsDelete().equals(Boolean.TRUE)) {
-			throw new UserNotFoundException("Delete User");
+		if (users.getStatus() == UserStatus.DELETE) {
+			throw new NotFoundException("Delete User");
+		}
+
+		if (users.getStatus() == UserStatus.BAN) {
+			throw new BadRequestException("BAN User");
 		}
 
 		return users;
 	}
 
 	@Transactional
-	public void signup(UsersSignUpReqDto signUpDTO) {
+	public void signUp(UsersSignUpDto signUpDTO) {
 		if (usersRepository.existsByEmail(signUpDTO.email())) {
 			throw new ConflictRequestException("email Already exists");
 		}
@@ -90,46 +87,33 @@ public class UsersService {
 			throw new ConflictRequestException("name Already exists");
 		}
 
-		Users users = new Users(
-			signUpDTO.email(),
-			signUpDTO.name(),
-			passwordEncoder.encode(signUpDTO.password())
-		);
-		usersRepository.save(users);
+		// 사용자 생성
+		Users users = usersRepository.save(new Users(
+				signUpDTO.email(), signUpDTO.name(), passwordEncoder.encode(signUpDTO.password())
+		));
 
-		// post-service에게 사용자 그룹 생성을 요청한다.
-		UsersGroupCreateDto createDto = new UsersGroupCreateDto(
-				users.getId(), users.getName(), users.getImgUrl()
-		);
-
-		if (!groupGatewayService.reqeusetPostUserGroup(createDto)) {
-			throw new ServiceUnavailabeExcpetion("post-service unabliable");
-		}
-
-		// 사용자 검색을 위해 요청을 보낸다.
-		// 그룹 검색을 위해 추가
-		UsersDto usersDto = new UsersDto(users);
-		kafkaService.sendMsg("users-search", usersDto);
+		// 사용자 검색을 위해 검색 애플리케이션으로 데이터 전송
+		UsersKafkaDto usersKafkaDto = UsersKafkaDto.from(users);
+		kafkaService.sendMsg("users-search", usersKafkaDto);
 	}
 
 	@Transactional
-	public void changePassword(UsersChangePasswordReqDto passwordReqDto) {
+	public void changePassword(UsersChangePasswordDto passwordReqDto) {
 		Users users = usersRepository.findByEmail(passwordReqDto.email())
 				.orElseThrow(() -> {
 					log.info("Cant find email : {}", passwordReqDto.email());
-					return new UserNotFoundException("User Not Found");
+					return new NotFoundException("User Not Found");
 				});
 		users.updatePassword(passwordEncoder.encode(passwordReqDto.password()));
 	}
 
 	@Transactional
-//	@CacheEvict(value = "userInfo", key = "T(kyulab.usersservice.util.UserContext).getUserId()")
-	public UsersInfoResDto update(UsersUpdateReqDto updateReqDTO) {
+	public void updateUser(UsersUpdateReqDto updateReqDTO) {
 		long id = UserContext.getUserId();
 		Users users = usersRepository.findById(id)
 				.orElseThrow(() -> {
 					log.info("Fail UserId : {}", id);
-					return new UserNotFoundException("User Not Found");
+					return new NotFoundException("User Not Found");
 				});
 
 		if (!StringUtils.hasText(updateReqDTO.passWord())) {
@@ -137,7 +121,6 @@ public class UsersService {
 		}
 
 		users.updatePassword(passwordEncoder.encode(updateReqDTO.passWord()));
-		return UsersInfoResDto.from(users);
 	}
 
 	@Transactional
@@ -146,13 +129,16 @@ public class UsersService {
 		Users users = usersRepository.findById(id)
 				.orElseThrow(() -> {
 					log.info("Fail UserId : {}", id);
-					return new UserNotFoundException("User Not Found");
+					return new NotFoundException("User Not Found");
 				});
 
-		if (users.getIsDelete().equals(Boolean.TRUE)) {
-			throw new BadRequestException("Already delete User");
+		if (users.getStatus() == UserStatus.DELETE) {
+			throw new BadRequestException("Already delete");
 		}
-		users.deleteUsers();
+
+		users.updateUserStatus(UserStatus.DELETE);
+		UsersKafkaDto usersKafkaDto = UsersKafkaDto.from(users);
+		kafkaService.sendMsg("users-search-delete", usersKafkaDto);
 	}
 
 }

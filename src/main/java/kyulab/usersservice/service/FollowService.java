@@ -1,6 +1,6 @@
 package kyulab.usersservice.service;
 
-import kyulab.usersservice.dto.res.FollowDto;
+import kyulab.usersservice.dto.res.FollowInfoDto;
 import kyulab.usersservice.entity.Follow;
 import kyulab.usersservice.entity.Users;
 import kyulab.usersservice.handler.exception.BadRequestException;
@@ -22,11 +22,11 @@ public class FollowService {
 	private final UsersService usersService;
 
 	@Transactional(readOnly = true)
-	public List<FollowDto> getFollows() {
+	public List<FollowInfoDto> getFollows() {
 		Users users = usersService.getUser(UserContext.getUserId());
 		return followRepository.findFollowsByFollower(users).stream()
 				.map(follow -> usersService.getUser(follow.getFollower().getId()))
-				.map(FollowDto::from)
+				.map(FollowInfoDto::from)
 				.toList();
 	}
 

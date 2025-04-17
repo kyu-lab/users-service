@@ -1,4 +1,4 @@
-package kyulab.usersservice.dto.gateway;
+package kyulab.usersservice.dto.gateway.req;
 
 import java.util.Set;
 
@@ -7,5 +7,5 @@ import java.util.Set;
  * @param requestUserId 요청한 사용자 아이디
  * @param usersIds 사용자 목록 (중복 X)
  */
-public record UsersListDto(Long requestUserId, Set<Long> usersIds) {
+public record UsersListGatewayDto(Long requestUserId, Set<Long> usersIds) {
 }

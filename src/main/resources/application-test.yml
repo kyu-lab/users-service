@@ -19,3 +19,8 @@ spring:
 eureka:
   client:
     enabled: false
+jwt:
+  refresh-token: YWRza2ZqZGFzZjgwOUojKSgkamN4b2twZmp6cG9qMnA5alMpX0QoQVUqRCkyMzRrbGpkaG9wZmRzamFpZm9wYXNkdWZqcG8=
+  refresh-expiredTime: 1
+  access-token: YWRza2ZqZGFzZjgwOUojKSgkamN4b2twZmp6cG9qMnA5alMpX0QoQVUqRCkyMzRrbGpkaG9wZmRzamFpZm9wYXNkdWZqcG8
+  access-expiredTime: 1

@@ -2,6 +2,8 @@ package kyulab.usersservice.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import kyulab.usersservice.domain.UserStatus;
+import kyulab.usersservice.dto.req.UsersSignUpDto;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,7 +19,7 @@ import java.time.LocalDateTime;
 public class Users {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE)
+	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 
 	@Column(unique = true, length = 100)
@@ -31,10 +33,13 @@ public class Users {
 	private String password;
 	
 	@Column
-	private String imgUrl; // 사용자 사진
+	private String iconUrl;
 
 	@Column
-	private Boolean isDelete;
+	private String bannerUrl;
+
+	@Enumerated(EnumType.STRING)
+	private UserStatus status;
 
 	@CreatedDate
 	@Column(updatable = false)
@@ -44,22 +49,23 @@ public class Users {
 		this.email = email;
 		this.name = name;
 		this.password = password;
-		this.isDelete = false;
+		this.status = UserStatus.ACTIVE;
 	}
 
 	public void updatePassword(String password) {
 		this.password = password;
 	}
 
-	public void updateUserImg(String imgUrl) {
-		this.imgUrl = imgUrl;
+	public void updateIconUrl(String iconUrl) {
+		this.iconUrl = iconUrl;
 	}
 
-	/**
-	 * 사용자를 삭제 상태로 변경한다.
-	 */
-	public void deleteUsers() {
-		this.isDelete = true;
+	public void updateBannerUrl(String bannerUrl) {
+		this.bannerUrl = bannerUrl;
+	}
+
+	public void updateUserStatus(UserStatus status) {
+		this.status = status;
 	}
 
 }

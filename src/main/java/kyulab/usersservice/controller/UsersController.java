@@ -1,16 +1,17 @@
 package kyulab.usersservice.controller;
 
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
-import kyulab.usersservice.dto.req.UsersChangePasswordReqDto;
+import kyulab.usersservice.dto.req.UsersChangePasswordDto;
+import kyulab.usersservice.dto.req.UsersLoginDto;
+import kyulab.usersservice.dto.req.UsersSignUpDto;
 import kyulab.usersservice.dto.res.TokenDto;
-import kyulab.usersservice.dto.req.UsersSignUpReqDto;
-import kyulab.usersservice.dto.res.UsersInfoResDto;
+import kyulab.usersservice.dto.res.UsersInfoDto;
 import kyulab.usersservice.entity.Users;
+import kyulab.usersservice.handler.exception.ConflictRequestException;
+import kyulab.usersservice.handler.exception.NotFoundException;
 import kyulab.usersservice.service.TokenService;
 import kyulab.usersservice.service.UsersService;
-import kyulab.usersservice.dto.req.UsersLoginReqDto;
 import kyulab.usersservice.dto.req.UsersUpdateReqDto;
 import kyulab.usersservice.util.UserContext;
 import lombok.RequiredArgsConstructor;
@@ -43,13 +44,11 @@ public class UsersController {
 	@GetMapping("/mail/{email}/check")
 	public ResponseEntity<String> checkEmail(
 			@PathVariable("email")
-			@NotBlank(message = "이메일은 필수입니다.")
 		 	@Email(
 			 	regexp = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*$",
 			 	message = "유효한 이메일 형식이어야 합니다."
 			)
 		 	String mail) {
-
 		if (usersService.existsByEmail(mail)) {
 			return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 사용중인 이메일입니다.");
 		}
@@ -59,14 +58,13 @@ public class UsersController {
 	@GetMapping("/mail/{email}/exists")
 	public ResponseEntity<String> existsEmail(
 			@PathVariable("email")
-			@NotBlank(message = "이메일은 필수입니다.")
 			@Email(
-					regexp = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*$",
-					message = "유효한 이메일 형식이어야 합니다."
+				regexp = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)*$",
+				message = "유효한 이메일 형식이어야 합니다."
 			)
 			String mail) {
 		if (!usersService.existsByEmail(mail)) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("존재하지 않는 이메일입니다.");
+			throw new NotFoundException("존재하지 않는 이메일입니다.");
 		}
 		return ResponseEntity.ok().build();
 	}
@@ -74,14 +72,13 @@ public class UsersController {
 	@GetMapping("/name/{name}/check")
 	public ResponseEntity<String> checkName(
 			@PathVariable("name")
-			@NotBlank(message = "이름은 필수 입력 항목입니다.")
 			@Pattern(
 				regexp = "^[a-zA-Z][a-zA-Z0-9_-]{2,29}$",
 				message = "사용자 이름은 영문자로 시작해야 하며, 영문, 숫자, '_', '-', 만 사용할 수 있습니다."
 			)
 			String name) {
 		if (usersService.existsByName(name)) {
-			return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 사용중인 이름입니다.");
+			throw new ConflictRequestException("이미 사용중인 이름입니다.");
 		}
 		return ResponseEntity.ok().build();
 	}
@@ -94,12 +91,12 @@ public class UsersController {
 	}
 
 	@GetMapping("/{userId}/info")
-	public ResponseEntity<UsersInfoResDto> getUserInfo(@PathVariable long userId) {
+	public ResponseEntity<UsersInfoDto> getUserInfo(@PathVariable long userId) {
 		return ResponseEntity.ok(usersService.getUserInfo(userId));
 	}
 
 	@PostMapping("/login")
-	public ResponseEntity<TokenDto> login(@RequestBody UsersLoginReqDto loginReqDTO) {
+	public ResponseEntity<TokenDto> login(@RequestBody UsersLoginDto loginReqDTO) {
 		Users users = usersService.login(loginReqDTO);
 		String refreshToken = tokenService.createToken(users, false);
 		redisTemplate.opsForValue().set("refresh-" + users.getId(), refreshToken, refreshExpiredTime, TimeUnit.SECONDS);
@@ -120,8 +117,8 @@ public class UsersController {
 	}
 
 	@PostMapping("/signup")
-	public ResponseEntity<String> signup(@RequestBody UsersSignUpReqDto signUpReqDTO) {
-		usersService.signup(signUpReqDTO);
+	public ResponseEntity<String> signup(@RequestBody UsersSignUpDto signUpReqDTO) {
+		usersService.signUp(signUpReqDTO);
 		return ResponseEntity.ok("회원가입을 완료되었습니다.");
 	}
 
@@ -148,20 +145,21 @@ public class UsersController {
 	}
 
 	@PostMapping("/change/password")
-	public ResponseEntity<String> changePassword(@RequestBody UsersChangePasswordReqDto passwordReqDto) {
+	public ResponseEntity<String> changePassword(@RequestBody UsersChangePasswordDto passwordReqDto) {
 		usersService.changePassword(passwordReqDto);
 		return ResponseEntity.ok("비밀번호가 재설정되었습니다.");
 	}
 
 	@PutMapping("/update")
-	public ResponseEntity<UsersInfoResDto> update(@RequestBody UsersUpdateReqDto updateReqDTO) {
-		return ResponseEntity.ok(usersService.update(updateReqDTO));
+	public ResponseEntity<String> updateUser(@RequestBody UsersUpdateReqDto updateReqDTO) {
+		usersService.updateUser(updateReqDTO);
+		return ResponseEntity.ok().build();
 	}
 
 	@DeleteMapping
 	public ResponseEntity<String> deleteUser() {
 		usersService.delete();
-		return ResponseEntity.ok().build();
+		return ResponseEntity.accepted().build();
 	}
 
 }
