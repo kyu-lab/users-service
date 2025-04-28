@@ -1,8 +1,9 @@
 package kyulab.usersservice.service.kafka;
 
-import kyulab.usersservice.dto.kafka.UserImgDto;
+import kyulab.usersservice.domain.UserImgType;
+import kyulab.usersservice.dto.kafka.UserImgKafkaDto;
 import kyulab.usersservice.entity.Users;
-import kyulab.usersservice.handler.exception.UserNotFoundException;
+import kyulab.usersservice.handler.exception.NotFoundException;
 import kyulab.usersservice.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,13 +18,17 @@ public class UsersKafkaService {
 	private final UsersRepository usersRepository;
 
 	@Transactional
-	public void updateUserImg(UserImgDto userImgDto) {
-		Users users = usersRepository.findById(userImgDto.userId())
+	public void updateUserImg(UserImgKafkaDto userImgKafkaDto) {
+		Users users = usersRepository.findById(userImgKafkaDto.userId())
 				.orElseThrow(() -> {
-					log.info("Fail UserId : {}", userImgDto.userId());
-					return new UserNotFoundException("Inavlid User");
+					log.info("Fail UserId : {}", userImgKafkaDto.userId());
+					return new NotFoundException("Inavlid User");
 				});
-		users.updateUserImg(userImgDto.userImgPath());
+		if (userImgKafkaDto.type() == UserImgType.ICON) {
+			users.updateIconUrl(userImgKafkaDto.imgUrl());
+		} else if (userImgKafkaDto.type() == UserImgType.BANNER) {
+			users.updateBannerUrl(userImgKafkaDto.imgUrl());
+		}
 	}
 
 }

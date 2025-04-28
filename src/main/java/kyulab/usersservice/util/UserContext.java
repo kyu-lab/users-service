@@ -2,7 +2,10 @@ package kyulab.usersservice.util;
 
 import kyulab.usersservice.handler.exception.BadRequestException;
 
-// 사용자 아이디 관리용
+/**
+ * 요청한 사용자 아이디 관리 객체 <br />
+ * 파싱 위치는 {@link kyulab.usersservice.interceptor.ServiceInterceptor}를 참고.
+ */
 public class UserContext {
 	private static final ThreadLocal<Long> userIdContext = new ThreadLocal<>();
 

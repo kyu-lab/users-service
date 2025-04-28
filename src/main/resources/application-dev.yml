@@ -4,6 +4,7 @@ spring:
     config:
       enabled: false
   datasource:
+    url: jdbc:postgresql://localhost:5432/users-service
     hikari:
       username: postgres
       password: 1234
@@ -54,7 +55,6 @@ logging:
     com.netflix.discovery: INFO
     org.springframework.kafka: INFO
     org.springframework.data.jpa: DEBUG
-    org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
     org.hibernate.type.descriptor.sql.BasicExtractor: TRACE
 jwt:
@@ -65,6 +65,4 @@ jwt:
   httpOnly: false
   secure: false
 gateway:
-  base-url: http://localhost:8000/gateway
   gateway-key: ZGtzb2FmamRhc3BvZmphZHdzZjtsa2prbGohQCNAKClfKmpA
-  group-path: /group

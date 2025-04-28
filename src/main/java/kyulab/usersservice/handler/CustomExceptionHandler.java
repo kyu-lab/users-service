@@ -9,10 +9,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @Slf4j
 @ControllerAdvice
-public class CommonExceptionHandler {
+public class CustomExceptionHandler {
 
-	@ExceptionHandler(UserNotFoundException.class)
-	public ResponseEntity<String> handleNotFoundException(UserNotFoundException e) {
+	@ExceptionHandler(NotFoundException.class)
+	public ResponseEntity<String> handleNotFoundException(NotFoundException e) {
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
 	}
 

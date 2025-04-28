@@ -1,12 +1,11 @@
 package kyulab.usersservice.controller.gateway;
 
-import kyulab.usersservice.dto.gateway.UsersList;
-import kyulab.usersservice.dto.res.UsersInfoResDto;
+import kyulab.usersservice.dto.gateway.req.UsersListGatewayReqDto;
+import kyulab.usersservice.dto.gateway.res.UsersListGatewayResDto;
+import kyulab.usersservice.dto.gateway.res.UsersInfoGatewayResDto;
 import kyulab.usersservice.service.gateway.UsersGatewayService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/gateway/users")
@@ -16,13 +15,13 @@ public class UsersGatewayController {
 	private final UsersGatewayService usersGatewayService;
 
 	@GetMapping("/{id}")
-	public UsersInfoResDto getUser(@PathVariable Long id) {
+	public UsersInfoGatewayResDto getUser(@PathVariable long id) {
 		return usersGatewayService.getUser(id);
 	}
 
 	@PostMapping
-	public UsersList getUsers(@RequestBody List<Long> userIds) {
-		return usersGatewayService.getUsers(userIds);
+	public UsersListGatewayResDto getUsers(@RequestBody UsersListGatewayReqDto listDto) {
+		return usersGatewayService.getUsers(listDto);
 	}
 
 }

@@ -23,15 +23,4 @@ public class WebConfig implements WebMvcConfigurer {
 				.addPathPatterns("/api/**");
 	}
 
-	/*
-	 * 개발 전용 설정입니다.
-	 */
-//	@Override
-//	public void addCorsMappings(CorsRegistry registry) {
-//		registry.addMapping("/api/users/**")
-//				.allowedOrigins("*")
-//				.allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-//				.allowedHeaders("*");
-//	}
-
 }

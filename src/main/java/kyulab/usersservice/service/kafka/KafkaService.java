@@ -1,7 +1,7 @@
 package kyulab.usersservice.service.kafka;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import kyulab.usersservice.dto.kafka.UserImgDto;
+import kyulab.usersservice.dto.kafka.UserImgKafkaDto;
 import kyulab.usersservice.handler.exception.ServerErrorExcpetion;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,8 +32,8 @@ public class KafkaService {
 	@KafkaListener(topics = "user-image-url", groupId = "users-group")
 	public void consumeUserImg(ConsumerRecord<String, String> record) {
 		try {
-			UserImgDto userImgDto = objectMapper.readValue(record.value(), UserImgDto.class);
-			usersKafkaService.updateUserImg(userImgDto);
+			UserImgKafkaDto userImgKafkaDto = objectMapper.readValue(record.value(), UserImgKafkaDto.class);
+			usersKafkaService.updateUserImg(userImgKafkaDto);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

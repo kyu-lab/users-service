@@ -37,7 +37,6 @@ public class TokenService {
 
 		Claims claims = Jwts.claims().setSubject(String.valueOf(users.getId()));
 		claims.put("name", users.getName());
-		claims.put("imgUrl", users.getImgUrl());
 
 		LocalDateTime localDateTime = LocalDateTime.now();
 		Date issuedAt = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());

@@ -9,7 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -20,12 +21,12 @@ public class FollowGatewayService {
 	private final UsersService usersService;
 
 	@Transactional(readOnly = true)
-	public List<Long> getFollows(long id) {
+	public Set<Long> getFollows(long id) {
 		Users users = usersService.getUser(id);
 		return followRepository.findFollowsByFollower(users).stream()
 				.map(Follow::getFollowing)
 				.map(Users::getId)
-				.toList();
+				.collect(Collectors.toSet());
 	}
 
 

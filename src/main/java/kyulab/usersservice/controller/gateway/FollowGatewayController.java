@@ -4,8 +4,7 @@ import kyulab.usersservice.service.gateway.FollowGatewayService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
+import java.util.Set;
 
 @RestController
 @RequestMapping("/gateway/follow")
@@ -15,7 +14,7 @@ public class FollowGatewayController {
 	private final FollowGatewayService followGatewayService;
 
 	@GetMapping("/{id}")
-	public List<Long> getFollows(@PathVariable long id) {
+	public Set<Long> getFollows(@PathVariable long id) {
 		return followGatewayService.getFollows(id);
 	}
 
