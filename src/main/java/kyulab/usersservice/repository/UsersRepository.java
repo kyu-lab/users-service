@@ -1,6 +1,6 @@
 package kyulab.usersservice.repository;
 
-import kyulab.usersservice.dto.gateway.res.UsersPreviewGatewayDto;
+import kyulab.usersservice.dto.gateway.res.UsersInfoGatewayResDto;
 import kyulab.usersservice.entity.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -22,7 +22,17 @@ public interface UsersRepository extends JpaRepository<Users, Long> {
 
 	@Query("""
 		select
-		new kyulab.usersservice.dto.gateway.res.UsersPreviewGatewayDto(
+		new kyulab.usersservice.dto.gateway.res.UsersInfoGatewayResDto(
+			u.id, u.email, u.name, u.iconUrl, u.bannerUrl, FALSE
+		)
+		from Users u
+		where u.id = :id
+	""")
+	Optional<UsersInfoGatewayResDto> findUserWithFollow(@Param("id") long userId);
+
+	@Query("""
+		select
+		new kyulab.usersservice.dto.gateway.res.UsersInfoGatewayResDto(
 			u.id, u.email, u.name, u.iconUrl, u.bannerUrl, FALSE
 		)
 		from Users u
@@ -30,11 +40,11 @@ public interface UsersRepository extends JpaRepository<Users, Long> {
 		on f.follower.id = u.id
 		where u.id in :ids
 	""")
-	List<UsersPreviewGatewayDto> findUserWithFollow(@Param("ids") Set<Long> userIds);
+	List<UsersInfoGatewayResDto> findUsersWithFollow(@Param("ids") Set<Long> userIds);
 
 	@Query("""
 		select
-		new kyulab.usersservice.dto.gateway.res.UsersPreviewGatewayDto(
+		new kyulab.usersservice.dto.gateway.res.UsersInfoGatewayResDto(
 			u.id, u.email, u.name, u.iconUrl, u.bannerUrl,
 			CASE WHEN f.follower IS NOT NULL THEN TRUE ELSE FALSE END
 		)
@@ -44,6 +54,6 @@ public interface UsersRepository extends JpaRepository<Users, Long> {
 		and f.following.id = :requestId
 		where u.id in :ids
 	""")
-	List<UsersPreviewGatewayDto> findUserWithFollowForLogin(@Param("requestId") long requestId, @Param("ids") Set<Long> userIds);
+	List<UsersInfoGatewayResDto> findUsersWithFollowForLogin(@Param("requestId") long requestId, @Param("ids") Set<Long> userIds);
 
 }

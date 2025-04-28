@@ -7,5 +7,5 @@ import java.util.Set;
  * @param requestUserId 요청한 사용자 아이디
  * @param usersIds 사용자 목록 (중복 X)
  */
-public record UsersListGatewayDto(Long requestUserId, Set<Long> usersIds) {
+public record UsersListGatewayReqDto(Long requestUserId, Set<Long> usersIds) {
 }
