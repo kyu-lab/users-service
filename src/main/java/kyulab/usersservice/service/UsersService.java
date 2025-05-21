@@ -4,6 +4,7 @@ import kyulab.usersservice.domain.UserStatus;
 import kyulab.usersservice.dto.kafka.UsersKafkaDto;
 import kyulab.usersservice.dto.req.UsersChangePasswordDto;
 import kyulab.usersservice.dto.req.UsersLoginDto;
+import kyulab.usersservice.dto.res.FollowingCountDto;
 import kyulab.usersservice.dto.res.UsersInfoDto;
 import kyulab.usersservice.dto.req.UsersSignUpDto;
 import kyulab.usersservice.dto.req.UsersUpdateReqDto;
@@ -11,7 +12,9 @@ import kyulab.usersservice.entity.Users;
 import kyulab.usersservice.handler.exception.BadRequestException;
 import kyulab.usersservice.handler.exception.ConflictRequestException;
 import kyulab.usersservice.handler.exception.NotFoundException;
+import kyulab.usersservice.repository.FollowRepository;
 import kyulab.usersservice.repository.UsersRepository;
+import kyulab.usersservice.service.gateway.GatewayService;
 import kyulab.usersservice.service.kafka.KafkaService;
 import kyulab.usersservice.util.UserContext;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +30,9 @@ import org.springframework.util.StringUtils;
 public class UsersService {
 
 	private final KafkaService kafkaService;
+	private final GatewayService gatewayService;
 	private final UsersRepository usersRepository;
+	private final FollowRepository followRepository;
 	private final PasswordEncoder passwordEncoder;
 
 	@Transactional(readOnly = true)
@@ -41,7 +46,10 @@ public class UsersService {
 
 	@Transactional(readOnly = true)
 	public UsersInfoDto getUserInfo(long userId) {
-		return UsersInfoDto.from(getUser(userId));
+		Users users = getUser(userId);
+		long postCount = gatewayService.requestPostCount(userId);
+		FollowingCountDto followingCountDto = followRepository.countFollowingByUserId(userId);
+		return UsersInfoDto.from(users, postCount, followingCountDto);
 	}
 
 	@Transactional(readOnly = true)

@@ -38,6 +38,9 @@ public class Users {
 	@Column
 	private String bannerUrl;
 
+	@Column(length = 100)
+	private String description;
+
 	@Enumerated(EnumType.STRING)
 	private UserStatus status;
 

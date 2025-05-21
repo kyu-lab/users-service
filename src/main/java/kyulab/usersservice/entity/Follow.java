@@ -1,6 +1,7 @@
 package kyulab.usersservice.entity;
 
 import jakarta.persistence.*;
+import kyulab.usersservice.util.UserContext;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
