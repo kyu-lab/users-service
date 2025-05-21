@@ -1,13 +1,10 @@
 package kyulab.usersservice.controller;
 
-import kyulab.usersservice.dto.res.FollowInfoDto;
+import kyulab.usersservice.dto.res.UserFollowDto;
 import kyulab.usersservice.service.FollowService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-
 
 @RestController
 @RequestMapping("/api/follow")
@@ -16,9 +13,18 @@ public class FollowController {
 
 	private final FollowService followService;
 
-	@GetMapping
-	public ResponseEntity<List<FollowInfoDto>> getFollows() {
-		return ResponseEntity.ok(followService.getFollows());
+	@GetMapping("/{userId}/follower")
+	public ResponseEntity<UserFollowDto> getFollower(
+			@PathVariable long userId,
+			@RequestParam(required = false) Long cursor) {
+		return ResponseEntity.ok(followService.getFollower(userId, cursor));
+	}
+
+	@GetMapping("/{userId}/following")
+	public ResponseEntity<UserFollowDto> getFollowing(
+			@PathVariable long userId,
+			@RequestParam(required = false) Long cursor) {
+		return ResponseEntity.ok(followService.getFollowing(userId, cursor));
 	}
 
 	@PostMapping("/{followerId}")

@@ -1,6 +1,7 @@
 package kyulab.usersservice.service;
 
 import kyulab.usersservice.dto.res.FollowInfoDto;
+import kyulab.usersservice.dto.res.UserFollowDto;
 import kyulab.usersservice.entity.Follow;
 import kyulab.usersservice.entity.Users;
 import kyulab.usersservice.handler.exception.BadRequestException;
@@ -8,6 +9,7 @@ import kyulab.usersservice.repository.FollowRepository;
 import kyulab.usersservice.util.UserContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,12 +24,19 @@ public class FollowService {
 	private final UsersService usersService;
 
 	@Transactional(readOnly = true)
-	public List<FollowInfoDto> getFollows() {
-		Users users = usersService.getUser(UserContext.getUserId());
-		return followRepository.findFollowsByFollower(users).stream()
-				.map(follow -> usersService.getUser(follow.getFollower().getId()))
-				.map(FollowInfoDto::from)
-				.toList();
+	public UserFollowDto getFollower(long userId, Long cursor) {
+		int limit = 10;
+		PageRequest pageable = PageRequest.of(0, limit + 1);
+		List<FollowInfoDto> userList = followRepository.findFollowerByCuror(userId, cursor, pageable);
+		return UserFollowDto.from(userList, limit);
+	}
+
+	@Transactional(readOnly = true)
+	public UserFollowDto getFollowing(long userId, Long cursor) {
+		int limit = 10;
+		PageRequest pageable = PageRequest.of(0, limit + 1);
+		List<FollowInfoDto> userList = followRepository.findFollowingByCuror(userId, cursor, pageable);
+		return UserFollowDto.from(userList, limit);
 	}
 
 	@Transactional
